@@ -276,7 +276,11 @@ func (sx *SerialXport) Tx(bytes []byte) error {
 			/* slower platforms take some time to process each segment
 			 * and have very small receive buffers.  Give them a bit of
 			 * time here */
-			time.Sleep(20 * time.Millisecond)
+
+			/* [Andreas Pettersson, 2023-01-20]: Changed to 1 ms,
+			 * inspiration from https://devzone.nordicsemi.com/f/nordic-q-a/86191/mcuboot-slow-with-nrf52840-zephyr-usb-cdc_acm-protocol
+			 */
+			time.Sleep(1 * time.Millisecond)
 			sx.txRaw([]byte{4, 20})
 		}
 
@@ -287,7 +291,10 @@ func (sx *SerialXport) Tx(bytes []byte) error {
 		 * carriage return (and possibly LF 2 bytes), */
 
 		/* all totaled, 124 bytes should work */
-		writeLen := util.Min(124, totlen-written)
+		/* [Andreas Pettersson, 2023-01-20]: Changed to 1020,
+		 * inspiration from https://devzone.nordicsemi.com/f/nordic-q-a/86191/mcuboot-slow-with-nrf52840-zephyr-usb-cdc_acm-protocol
+		 */
+		writeLen := util.Min(1020, totlen-written)
 
 		writeBytes := base64Data[written : written+writeLen]
 		sx.txRaw(writeBytes)
